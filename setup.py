@@ -19,10 +19,6 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=required_packages,
     setup_requires=['setuptools-git'],
-      install_requires=[
-          'pandas',
-          'numpy',
-      ],
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: End Users/Desktop',
