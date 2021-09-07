@@ -14,10 +14,15 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url='https://github.com/OfficialCodexplosive/cucopy',
+    download_url = 'https://github.com/OfficialCodexplosive/cucopy/archive/v1.0.tar.gz',
     include_package_data=True,
     packages=setuptools.find_packages(),
     install_requires=required_packages,
     setup_requires=['setuptools-git'],
+      install_requires=[
+          'pandas',
+          'numpy',
+      ],
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: End Users/Desktop',
