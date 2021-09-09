@@ -1,9 +1,9 @@
 from .components import exchange, inflation, utils, settings
-import components.update
+from .components.update import download_and_extract
 
 def update():
-    components.update.download_and_extract(settings.DOWNLOAD_CPI, settings.WORLD_CPI)
-    components.update.download_and_extract(settings.DOWNLOAD_ER, settings.WORLD_ER)
+    download_and_extract(settings.DOWNLOAD_CPI, settings.WORLD_CPI)
+    download_and_extract(settings.DOWNLOAD_ER, settings.WORLD_ER)
 
 def adjust_currency(adjust_for_inflation : bool, 
         value : float, 

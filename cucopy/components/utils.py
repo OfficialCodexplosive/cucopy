@@ -1,7 +1,7 @@
 import datetime, dateutil.relativedelta
 import pandas as pd
 import numpy as np
-from .settings import DATA_CPI, WORLD_CPI, WORLD_CY, WORLD_ER
+from .settings import WORLD_CPI, WORLD_CY, WORLD_ER
 
 def _get_value(date, df, type_, fpath=None):
     """

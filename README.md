@@ -7,15 +7,15 @@ The CuCoPy package provides methods for exchanging currencies and adjusting mone
 * exchange currencies from 260+ countries.
 
 ## Installation
-In future versions, CuCoPy can be installed directly via
+CuCoPy can be installed directly via
 
 	pip install cucopy
 
-For now, in order to install the CuCoPy package and preserve the connection to the GitHub repository, first clone the repository via
+Or using GitHub: in order to install the CuCoPy package and preserve the connection to the GitHub repository, first clone the repository via
 
 	git clone https://github.com/OfficialCodexplosive/cucopy.git
 
-Then install DeDePy via python as follows
+Then install CuCoPy via python as follows
 	
 	cd cucopy
 	python setup.py install 

@@ -1,8 +1,5 @@
 from .settings import WORLD_CPI, WORLD_ER, WORLD_PATH, DOWNLOAD_CPI
 import os
-from xml.etree import ElementTree as ET
-import urllib.request
-from datetime import datetime
 
 def download_and_extract(url, path_):
     from io import BytesIO

@@ -1,6 +1,6 @@
 import pathlib
 
-WORLD_PATH = pathlib.Path(__file__).parent.absolute().joinpath("../data/world/")
+WORLD_PATH = pathlib.Path(__file__).parent.absolute().joinpath("../data/")
 WORLD_CPI = WORLD_PATH.joinpath("ConsumerPriceIndex.csv")
 WORLD_ER = WORLD_PATH.joinpath("ExchangeRate_LCU_per_USD.csv")
 WORLD_CY = WORLD_PATH.joinpath("_CurrencyYield.csv")
