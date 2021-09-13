@@ -1,7 +1,12 @@
 from .settings import WORLD_CPI, WORLD_ER, WORLD_PATH, DOWNLOAD_CPI
 import os
 
-def download_and_extract(url, path_):
+def download_and_extract(url):
+    """
+    download_and_extract downloads the zip file at the given url and extracts its non-metadata files.
+    
+    :param url: the url at which to find the zip.
+    """
     from io import BytesIO
     from zipfile import ZipFile
     from requests import get

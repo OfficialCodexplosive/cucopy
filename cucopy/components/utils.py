@@ -5,10 +5,13 @@ from .settings import WORLD_CPI, WORLD_CY, WORLD_ER
 
 def _get_value(date, df, type_, fpath=None):
     """
-    _get_value looks up the consumer price index for a given date (date) in a table provided by the Federal Statistical Office.
+    _get_value looks up the value of a cell for a given date (date) in a table provided by the Federal Statistical Office.
 
     :param date: the date for which to get a cpi for.
-    :return: the german consumer price index for a given date (date). 
+    :param df: the dataframe in which to look for the value.
+    :param type_: the type of information in the file (cpi? exchange value?)
+    :param fpath: the filepath of the dataframe. Used for recursive miss prevention.
+    :return: the value of a cell in a dataframe for a given date (date). 
     """
     #df_cpi = pd.read_csv(DATA_CPI, sep=";")
     try:
@@ -100,6 +103,13 @@ def get_dataframe(country_code, filename_):
     return res_df
 
 def get_exchange_rate_region(date, country_code):
+    """
+    get_exchange_rate_region looks up the country code of a newly adopted currency.
+
+    :param date: the date at which to check for the alternative currency.
+    :param country_code: the country code for which to find its alternative for.
+    :return: the newly adopted currency code.
+    """
     df = pd.read_csv(WORLD_CY, skiprows=4)
     vals = df.loc[df['Country Code'] == country_code][['New Country Code', 'Yielded']].values
     if vals[0][1] <= date.year:

@@ -5,10 +5,10 @@ def update():
     download_and_extract(settings.DOWNLOAD_CPI, settings.WORLD_CPI)
     download_and_extract(settings.DOWNLOAD_ER, settings.WORLD_ER)
 
-def adjust_currency(adjust_for_inflation : bool, 
-        value : float, 
-        from_country_code : str,
-        from_date : str, 
+def adjust_currency(from_country_code : str,
+        from_date : str,
+        value : float = 1,
+        adjust_for_inflation : bool = False, 
         to_country_code : str = None, 
         to_date : str = None):
 
