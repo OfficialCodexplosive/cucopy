@@ -10,10 +10,7 @@ def get_equivalent_worth(country_code, filename_, value=1, from_date=None, to_da
     :param to_date: the date for which to get the equivalent worth for. If None, will default to the most recent date for which a cpi is recorded.
     :return: the amount of money needed at (to_date) for it to have the same purchasing power as (value) in (from_date)
     """
-    #d = utils.validate_dates([from_date, to_date])
     df = utils.get_dataframe(country_code, filename_)
-    #from_cpi = utils.get_cpi(d[0], df)
-    #to_cpi = utils.get_cpi(d[1], df)
     from_cpi = utils.get_cpi(from_date, df)
     to_cpi = utils.get_cpi(to_date, df)
     if from_cpi == None or to_cpi == None:
@@ -47,9 +44,7 @@ def get_buying_power(country_code, filename_, value=1, from_date=None, to_date=N
     :param to_date: the date for which to get the adjusted worth for. If None, will default to the most recent date for which a cpi is recorded.
     :return: the remaining purchasing power money has at (to_date) compared to (from_date).
     """
-    #d = utils.validate_dates([from_date, to_date])
     df = utils.get_dataframe(country_code, filename_)
-    #ppp = _get_proportional_purchasing_power(df, from_date=d[0], to_date=d[1])
     ppp = _get_proportional_purchasing_power(df, from_date=from_date, to_date=to_date)
 
     if ppp == None:

@@ -10,6 +10,11 @@ def get_exchanged_value(from_country_code, to_country_code, filename_, value=1, 
     :param date: the date for which the exchange should take place.
     :return: the exchanged worth of the initial value in another currency.
     """
+    if date == None:
+        raise ValueError("Missing date.")
+    if value <= 0:
+        raise ValueError("Entered value is less than, or equal to, zero.")
+
     from_df = utils.get_dataframe(from_country_code, filename_)
     to_df = utils.get_dataframe(to_country_code, filename_)
 

@@ -28,8 +28,7 @@ def _get_value(date, df, type_, fpath=None):
     except Exception as e:
         f_occ = _get_occurence(df)
         l_occ = _get_occurence(df, True)
-        print("Couldn't find a(n) {} for the given date. Supported dates for the given currency range from {} to {}".format(type_, f_occ, l_occ))
-        return None
+        raise ValueError("Couldn't find a(n) {} for the given date. Supported dates for the given currency range from {} to {}".format(type_, f_occ, l_occ))
 
 def _get_occurence(df, do_reverse = False):
     """
@@ -99,6 +98,8 @@ def get_dataframe(country_code, filename_):
     """
     df = pd.read_csv(filename_, skiprows=4)
     matching_indices = df.index[df['Country Code'] == country_code].tolist()
+    if len(matching_indices) == 0:
+        raise ValueError("No matching dataset found for the given country code ({})".format(country_code))
     res_df = df.loc[matching_indices]
     return res_df
 
