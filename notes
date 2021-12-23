@@ -1,0 +1,14 @@
+https://www.bundesbank.de/statistic-rmi/StatisticDownload?tsId={...}&mode=its&its_csvFormat=de&its_currency=default&its_dateFormat=default&its_from=&its_to=
+
+Verbraucherpreisindex (Unharmonisch):
+    Insgesamt (PC100):
+        - Ursprungswerte:
+            BBDP1.M.DE.N.VPI.C.A00000.I15.A
+    Energie (PC400):
+        - Ursprungswerte:
+            BBDP1.M.DE.N.VPI.C.NRGY00.I15.A
+
+https://www.bundesbank.de/statistic-rmi/StatisticDownload?tsId=BBDP1.M.DE.N.VPI.C.A00000.I15.A&mode=its&its_csvFormat=de&its_currency=default&its_dateFormat=default&its_from=&its_to=
+
+Englisch:
+https://www.bundesbank.de/statistic-rmi/StatisticDownload?tsId=BBDP1.M.DE.N.VPI.C.A00000.I15.A&mode=its&its_csvFormat=en&its_currency=default&its_dateFormat=default&its_from=&its_to=
