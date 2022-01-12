@@ -12,7 +12,14 @@ VPI_ENERGY = "NRGY00"
 VPI_SERVICE_NO_RENT = "VXR"
 VPI_RENT = "C2C041"
 
-_timeseries = [VPI_ALL, VPI_FOOD, VPI_CONSUMER_GOOD_NO_ENERGY, VPI_ENERGY, VPI_SERVICE_NO_RENT, VPI_RENT]
+_timeseries = {
+                "all" : VPI_ALL, 
+                "food" : VPI_FOOD, 
+                "consumer_goods_no_energy" : VPI_CONSUMER_GOOD_NO_ENERGY, 
+                "energy" : VPI_ENERGY, 
+                "service_no_rent" : VPI_SERVICE_NO_RENT, 
+                "rent" : VPI_RENT
+                }
 
 parser = argparse.ArgumentParser()
 
@@ -21,7 +28,7 @@ parser.add_argument('-c',
                     metavar='string',
                     type=str,
                     required=True,
-                    help='consumer price index id')
+                    help='consumer price index id; allowed ids: '+''.join(id+', ' for id in list(_timeseries.keys())))
 parser.add_argument('-l',
                     '--language',
                     default='de',
@@ -38,6 +45,12 @@ def download_data(timeseries_classification, language='de'):
 
 def main():
     args = parser.parse_args()
-    download_data(args.classification, args.language)
+
+    if(args.classification.lower() not in _timeseries.keys()):
+        raise ValueError("There is no classification by the name " + args.classification)
+
+    ts_classification = _timeseries[args.classification.lower()]
+
+    download_data(ts_classification, args.language)
 
 main()
