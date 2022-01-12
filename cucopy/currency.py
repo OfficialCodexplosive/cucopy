@@ -46,7 +46,7 @@ class Currency(object):
     """specify currency and notation in kwargs.
        default is: 1, EUR, 10^0."""
     """value means [value] * notation"""
-    def __init__(self, recording_date : str, value : int = 1, **kwargs):
+    def __init__(self, recording_date : str, value : float = 1, **kwargs):
         """
         Constructor for creating a Currency class instance
 
@@ -56,7 +56,7 @@ class Currency(object):
 
         **Default arguments:**
         :param value: the monetary value. The default value is 1
-        :type value: int
+        :type value: float
 
         :param notation: the notation of the value. The default is '', meaning 1E0
         :type notation: string
@@ -87,7 +87,7 @@ class Currency(object):
             self.currency = self.EUR
 
     @classmethod
-    def unique_notation(cls, recording_date : str, notation : str, notation_pow : int, value : int = 1, **kwargs):
+    def unique_notation(cls, recording_date : str, notation : str, notation_pow : int, value : float = 1, **kwargs):
         """
         Decorator for creating a Currency class instance with a custom notation.
 
@@ -103,7 +103,7 @@ class Currency(object):
 
         **Default arguments:**
         :param value: the monetary value. The default value is 1
-        :type value: int
+        :type value: float
 
         :param currency: the currency in which the value was recorded. The default is 'Eur'.
         :type currency: string
@@ -133,7 +133,7 @@ class Currency(object):
         """
         self.target_date = self._validate_date(date_str)
 
-    def set_parser(self, path=None, delim=';', language='de'):
+    def set_parser(self, path=None, delim=';', language='de', classification='all'):
         """
         Function for setting the parser.
 
@@ -147,9 +147,9 @@ class Currency(object):
         :type language: string
         """
         if path == None:
-            self.parser = Parser(language=language)
+            self.parser = Parser(language=language, classification=classification)
         else:
-            self.parser = Parser.specified_path(csv_path=path, csv_delim=delim)
+            self.parser = Parser.specified_path(csv_path=path, csv_delim=delim, classification=classification)
 
     def adjust_for_inflation(self):
         """

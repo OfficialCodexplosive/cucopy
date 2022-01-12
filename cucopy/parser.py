@@ -1,9 +1,10 @@
 import pandas as pd
-import os
+import os, pathlib
 import datetime
 import urllib.request
 from locale import atof, setlocale, LC_NUMERIC
-from cucopy import DATASET_PATH
+
+from .config import DATASET_PATH, _timeseries
 
 class Parser(object):
     """
@@ -51,10 +52,10 @@ class Parser(object):
             self.locale_module = 'de_DE.utf8'
 
         if 'classification' in kwargs:
-            if kwargs.get('classification') in self._timeseries:
-                self.data_classification = kwargs.get('classification')
+            if kwargs.get('classification') in _timeseries:
+                self.data_classification = _timeseries[kwargs.get('classification')]
         else:
-            self.data_classification = self.VPI_ALL
+            self.data_classification = _timeseries['all']
 
         """ Path to where the default dataset will lie """
         default_path = os.path.join(DATASET_PATH, self.lang_delim_pair[0] ,(f"BBDP1.M.DE.N.VPI.C.{self.data_classification}.I15.A.csv"))
@@ -78,7 +79,9 @@ class Parser(object):
     def get_cpi(self, date : datetime.datetime):
         setlocale(LC_NUMERIC, self.locale_module)
 
-        date_index = f"{date.year}-{date.month}"
+        month = str(date.month).zfill(2)
+
+        date_index = f"{date.year}-{month}"
         date_col = self.df.columns[0]
         value_col = self.df.columns[1]
 
