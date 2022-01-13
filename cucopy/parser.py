@@ -30,14 +30,14 @@ class Parser(object):
         Constructor for creating a Currency class instance
 
         **Default arguments:**
-        :param : 
-        :type : 
+        :param language: the language of the .csv-files, important for parsing the file using pandas. Default is 'de'.
+        :type language: string
 
-        :param : 
-        :type : 
+        :param delimiter:  the delimiter used in a .csv-file, important for deducing the csv-file's location and parsing it using pandas, if no language is specified.
+        :type delimiter: string 
 
-        :param : 
-        :type : 
+        :param classification: the ID used to refer to the .csv-file.
+        :type classification: string 
         """
         if 'language' in kwargs:
             if kwargs.get('language') in self._supportedLang.keys():
@@ -63,20 +63,26 @@ class Parser(object):
         self.df = pd.read_csv(default_path, delimiter=self.lang_delim_pair[1])
 
     @classmethod
-    def specified_path(self, csv_path : str, csv_delim : str):
+    def specified_path(self, path : str, delimiter : str):
         """
-        Decorator for creating a Currency class instance with a custom notation.
+        Decorator for creating a Parser class instance with a custom path to a csv file.
 
         **Required arguments:**
-        :param : 
-        :type : string
+        :param path: the path to the custom .csv-file.
+        :type path: string
 
-        :param : 
-        :type : string
+        :param delimiter:  the delimiter used in a .csv-file, important for parsing the file using pandas.
+        :type delimiter: string 
         """
         self.df = pd.read_csv(csv_path, delimiter=csv_delim)
 
     def get_cpi(self, date : datetime.datetime):
+        """
+        Function for extracting the cpi from the Parser object's dataframe (self.df).
+
+        :param date_str: the target date, as a string
+        :type date_str: string
+        """
         setlocale(LC_NUMERIC, self.locale_module)
 
         month = str(date.month).zfill(2)

@@ -151,7 +151,7 @@ class Currency(object):
         else:
             self.parser = Parser.specified_path(csv_path=path, csv_delim=delim, classification=classification)
 
-    def adjust_for_inflation(self):
+    def get_equivalent_worth(self):
         """
         Function for getting the inflation-corrected value.
 
@@ -172,6 +172,27 @@ class Currency(object):
             warnings.warn("No parser assigned. Did you forget to call \'set_parser(...)\'?", RuntimeWarning)
             return None
 
+    def get_purchasing_power(self):
+        """
+        Function for getting the purchasing power of a value.
+
+        :returns: the base value's remaining purchasing power
+        :rtype: float
+        """
+        try:
+            recording_cpi = self.parser.get_cpi(self.recording_date)
+
+            try:
+                target_cpi = self.parser.get_cpi(self.target_date)
+            except AttributeError:
+                warnings.warn("No target date specified. Did you forget to call \'set_target_date(date_str)\'?", RuntimeWarning)
+                return None
+
+            return (target_cpi/recording_cpi)*self.value 
+        except AttributeError:
+            warnings.warn("No parser assigned. Did you forget to call \'set_parser(...)\'?", RuntimeWarning)
+            return None
+
 """Change in CPI:    TARGET_CPI / RECORDING_CPI
  Adjust EURO for inflation:
    A wind turbine had a recording price of 1.750.000€ in Dec, 2006.
@@ -182,4 +203,12 @@ class Currency(object):
      Nov, 2021: 110.5
 
    88.3/110.5  =  1.750.000/X  => X = (1.750.000*110.5)/88.3"""
+
+"""Calculate remaining purchasing power:
+CPI:
+     Dec, 2006: 88.3
+     Nov, 2021: 110.5
+
+(110.5/88.3) * X
+"""
 
