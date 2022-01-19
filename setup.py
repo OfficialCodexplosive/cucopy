@@ -7,7 +7,7 @@ with open(os.path.join(dir_path, 'requirements.txt')) as f:
 
 setuptools.setup(
     name='cucopy',
-    version='0.1.7',
+    version='0.1.8',
     author='Julian Schönau',
     author_email='j.schoenau@fz-juelich.de',
     description='Module for deflating euro values.',
