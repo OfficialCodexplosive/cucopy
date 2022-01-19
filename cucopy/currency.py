@@ -188,7 +188,7 @@ class Currency(object):
                 warnings.warn("No target date specified. Did you forget to call \'set_target_date(date_str)\'?", RuntimeWarning)
                 return None
 
-            return (target_cpi/recording_cpi)*self.value 
+            return (1-(recording_cpi/target_cpi))*self.value
         except AttributeError:
             warnings.warn("No parser assigned. Did you forget to call \'set_parser(...)\'?", RuntimeWarning)
             return None

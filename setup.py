@@ -7,14 +7,14 @@ with open(os.path.join(dir_path, 'requirements.txt')) as f:
 
 setuptools.setup(
     name='cucopy',
-    version='0.1.8',
+    version='0.1.9',
     author='Julian Schönau',
     author_email='j.schoenau@fz-juelich.de',
     description='Module for deflating euro values.',
 #    long_description=long_description,
     long_description_content_type="text/markdown",
     url='https://github.com/OfficialCodexplosive/cucopy',
-    download_url = 'https://github.com/OfficialCodexplosive/cucopy/archive/v0.1.6.tar.gz',
+    download_url = 'https://github.com/OfficialCodexplosive/cucopy/archive/v0.1.9.tar.gz',
     include_package_data=True,
     packages=setuptools.find_packages(),
     install_requires=required_packages,
