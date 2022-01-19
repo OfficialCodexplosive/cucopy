@@ -1,6 +1,6 @@
 # directories
 .vscode/
-FINE.egg-info
+cucopy.egg-info
 .idea/
 __pycache__/
 .ipynb_checkpoints/
@@ -12,6 +12,8 @@ __pycache__/
 *.dist/
 *.docs/_build/
 .vscode/
+*build/
+*dist/
 
 # file types to ignore
 *.pyc

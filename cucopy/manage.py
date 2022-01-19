@@ -34,6 +34,8 @@ def download_data(timeseries_classification, language='de'):
     download_link = f'https://www.bundesbank.de/statistic-rmi/StatisticDownload?tsId={file_name}&mode=its&its_csvFormat={language}&its_currency=default&its_dateFormat=default&its_from=&its_to='
     download_path = os.path.join(os.path.join(DATASET_PATH, language), file_name+'.csv')
         
+    pathlib.Path(download_path).mkdir(parents=True, exist_ok=True)
+
     urllib.request.urlretrieve(download_link, download_path)
 
 def main():
