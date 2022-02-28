@@ -14,6 +14,7 @@ __pycache__/
 .vscode/
 *build/
 *dist/
+*/__pycache__
 
 # file types to ignore
 *.pyc
@@ -23,3 +24,7 @@ __pycache__/
 *.glp
 *.mps
 .coverage
+
+# files
+notes.txt
+*/_legacy_comments.py

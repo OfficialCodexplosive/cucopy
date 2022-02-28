@@ -1,6 +1,7 @@
 import datetime
 import warnings
 from .parser import Parser
+from . import utils
 
 class Currency(object):
     """
@@ -11,13 +12,14 @@ class Currency(object):
     * It provides the basic structure of a value, meaning, it stores information about its dimension (i.e. the actual monetary value), its recording date and its unit.
     * In addition to the most common scientific number notations (K, M, B, T), it is also possible to store a currency with a custom notation and value.
     * It allows for easy adjustment for inflation of the provided value, in terms of taking a base value from date A and calculating its worth at date B.
+    * It allows for easy exchange from one currency to another, using their ISO 2 codes.
     
     The parameters stored in a Currency object refer to:
 
-    * the date, at which the value, which is to be adjusted for inflation, was recorded (**recording_date**)
+    * the year, at which the value, which is to be transformed, was recorded (**recording_year**)
     * the actual value to be adjusted (**value**)
     * the scientific notation of the value (**notation**; e.g. 'K' for 1.000, 'M' for 1.000.000, etc.)
-    * the currency in which the value was recorded (**currency**; for now: EURO)
+    * the iso code of the country in which the value was recorded (**iso**; default: 'de')
 
     When creating a Currency object with a custom notation, following parameters are added:
 
@@ -25,14 +27,9 @@ class Currency(object):
     
     Following parameters are also stored in an instance of this class, but only after initialization:
 
-    * the target date, meaning, the date, to which adjust the value to (**target_date**)
-    * the parser, which handles the extraction of CPIs from a table (**parser**)
+    * the target year, meaning, the year, to which adjust the value to (**target_year**)
+    * the parser, which handles the extraction of consumer price indices and exchange rate information from the World Bank and International Monetary Fund respectively (**parser**)
     """
-    YYYY_MM_DD = '%Y-%m-%d'
-    _allowed_date_formats = [YYYY_MM_DD]
-
-    EUR = "eur"
-    _allowed_currencies = [EUR]
 
     " dictionary of the most important scientific number notations and their value "
     _allowed_notations = {
@@ -43,16 +40,13 @@ class Currency(object):
         "T" : int(1e12)         
     }
 
-    """specify currency and notation in kwargs.
-       default is: 1, EUR, 10^0."""
-    """value means [value] * notation"""
-    def __init__(self, recording_date : str, value : float = 1, **kwargs):
+    def __init__(self, recording_year : str, value : float = 1, iso : str = 'de', **kwargs):
         """
         Constructor for creating a Currency class instance
 
         **Required arguments:**
-        :param recording_date: the date, at which a value was recorded
-        :type recording_date: string
+        :param recording_year: the year, at which a value was recorded
+        :type recording_year: string
 
         **Default arguments:**
         :param value: the monetary value. The default value is 1
@@ -61,12 +55,13 @@ class Currency(object):
         :param notation: the notation of the value. The default is '', meaning 1E0
         :type notation: string
 
-        :param currency: the currency in which the value was recorded. The default is 'Eur'.
-        :type currency: string
+        :param iso: the country code in which the value was recorded. The default is 'de'.
+        :type iso: string
         """
-
-        self.recording_date = self._validate_date(recording_date)
+        self.recording_year = self._validate_year(recording_year)
         self.value = value
+        self.iso = iso
+        self.parser = Parser(iso)
 
         if('notation' in kwargs):
             _notation = kwargs.get('notation')
@@ -76,24 +71,15 @@ class Currency(object):
                 raise ValueError(f"Notation {_notation} not supported.\nSupported notations are: {self._allowed_notations}.")
         else:
             self.notation = ""
-        
-        if('currency' in kwargs):
-            _currency = kwargs.get('currency')
-            if _currency in self._allowed_currencies:
-                self.currency = _currency
-            else:
-                raise ValueError(f"Currency {_currency} not supported.\nSupported currencies are: {self._allowed_currencies}.")
-        else:
-            self.currency = self.EUR
 
     @classmethod
-    def unique_notation(cls, recording_date : str, notation : str, notation_pow : int, value : float = 1, **kwargs):
+    def unique_notation(cls, recording_year : str, notation : str, notation_pow : int, value : float = 1, **kwargs):
         """
         Decorator for creating a Currency class instance with a custom notation.
 
         **Required arguments:**
-        :param recording_date: the date, at which a value was recorded
-        :type recording_date: string
+        :param recording_year: the date, at which a value was recorded
+        :type recording_year: string
 
         :param notation: the new and unique symbol/ string, by which the notation should be referred to
         :type notation: string
@@ -108,48 +94,52 @@ class Currency(object):
         :param currency: the currency in which the value was recorded. The default is 'Eur'.
         :type currency: string
         """
-        
         if value == None:
             value = 1
         if notation not in cls._allowed_notations:
             cls._allowed_notations[notation] = 10**notation_pow
         else:
             raise ValueError(f"Notation {notation} already defined.")
-        return cls(recording_date, value, notation=notation, kwargs=kwargs)
+        return cls(recording_year, value, notation=notation, kwargs=kwargs)
 
-    def _validate_date(self, date_str):
-        # TODO: COMPARE AGAINST DIFFERENT FORMATS AND RETURN AS YYYY-MM-DD
+    def _validate_year(self, year_str):
+        """
+        Helper function for checking, if a given string matches the YYYY date format.
+        """
         try:
-            return datetime.datetime.strptime(date_str, self.YYYY_MM_DD)
+            return datetime.datetime.strptime(year_str, "%Y").year
         except ValueError:
-            raise ValueError("Incorrect data format, should be YYYY-MM-DD")
+            raise ValueError("Incorrect year format, should be YYYY")
 
-    def set_target_date(self, date_str):
+    def set_target_year(self, year_str):
         """
-        Function for setting the date, to which should be adjusted to.
+        Function for setting the target year, to which should be adjusted to.
 
-        :param date_str: the target date, as a string
-        :type date_str: string
+        :param year_str: the target year, as a string
+        :type year_str: string
         """
-        self.target_date = self._validate_date(date_str)
+        self.target_date = self._validate_year(year_str)
 
-    def set_parser(self, path=None, delim=';', language='de', classification='all'):
+    def set_target_currency(self, iso_code):
         """
-        Function for setting the parser.
+        Function for setting the target country, to which should be exchanged to.
 
-        :param path: the path at which the csv file containing the recorded cpi values is stored
-        :type path: string
-
-        :param delim: the csv delimiter, by which the values are separated
-        :type delim: string
-
-        :param language: the language, in which the csv file is stored. Only needed, when no custom csv file is provided via path.
-        :type language: string
+        :param iso_code: the target country's ISO code
+        :type iso_code: string
         """
-        if path == None:
-            self.parser = Parser(language=language, classification=classification)
-        else:
-            self.parser = Parser.specified_path(csv_path=path, csv_delim=delim, classification=classification)
+        self.target_currency = iso_code
+
+    def real_value(self):
+        """
+        Function for getting the real value of the Currency object.
+        Obtained by multiplying the object's value with it's notation's value.
+
+        :returns: the real value of the object
+        :rtype: float
+        """
+        if self.notation:
+            return self.value * self._allowed_notations[self.notation]
+        return self.value
 
     def get_equivalent_worth(self):
         """
@@ -159,12 +149,12 @@ class Currency(object):
         :rtype: float
         """
         try:
-            recording_cpi = self.parser.get_cpi(self.recording_date)
+            recording_cpi = self.parser.get_cpi(self.recording_year)
 
             try:
                 target_cpi = self.parser.get_cpi(self.target_date)
             except AttributeError:
-                warnings.warn("No target date specified. Did you forget to call \'set_target_date(date_str)\'?", RuntimeWarning)
+                warnings.warn("No target date specified. Did you forget to call \'set_target_year(year_str)\'?", RuntimeWarning)
                 return None
 
             return ((self.value * target_cpi)/recording_cpi)
@@ -180,12 +170,12 @@ class Currency(object):
         :rtype: float
         """
         try:
-            recording_cpi = self.parser.get_cpi(self.recording_date)
+            recording_cpi = self.parser.get_cpi(self.recording_year)
 
             try:
                 target_cpi = self.parser.get_cpi(self.target_date)
             except AttributeError:
-                warnings.warn("No target date specified. Did you forget to call \'set_target_date(date_str)\'?", RuntimeWarning)
+                warnings.warn("No target date specified. Did you forget to call \'set_target_year(year_str)\'?", RuntimeWarning)
                 return None
 
             return (recording_cpi/target_cpi)*self.value
@@ -193,22 +183,30 @@ class Currency(object):
             warnings.warn("No parser assigned. Did you forget to call \'set_parser(...)\'?", RuntimeWarning)
             return None
 
-"""Change in CPI:    TARGET_CPI / RECORDING_CPI
- Adjust EURO for inflation:
-   A wind turbine had a recording price of 1.750.000€ in Dec, 2006.
-   What would that be in Nov, 2021?
+    def get_exchanged_value(self, currency_iso=None):
+        """
+        Function for calculating the worth of the current currency in another country.
+        The resulting value indicates how much it would take of the target countrie's currency to match the value of the object's value.
 
-   CPI:
-     Dec, 2006: 88.3
-     Nov, 2021: 110.5
+        :returns: the exchanged value of the current object (CURRENT/TARGET)
+        :rtype: float
+        """
+        exchange_year = self.recording_year
 
-   88.3/110.5  =  1.750.000/X  => X = (1.750.000*110.5)/88.3"""
+        iso = currency_iso
+        if iso == None:
+            if self.target_currency == None:
+                warnings.warn("Target currency was not set. Either pass an iso code to get_exchanged_value(currency_iso) or set a target currency using set_target_currency(iso_code).", RuntimeWarning)
+                return None
+            else:
+                iso = self.target_currency
 
-"""Calculate remaining purchasing power:
-CPI:
-     Dec, 2006: 88.3
-     Nov, 2021: 110.5
+        if iso.upper() not in utils.IMF_SUPPORTED_GEO:
+            warnings.warn("ISO code {iso} not supported. Did you you check spelling?".format(iso=iso), RuntimeWarning)
+            return None
 
-(110.5/88.3) * X
-"""
+        self_exchange_rate = self.parser.get_exchange_rate(exchange_year)
+        other_exchange_rate = self.parser.get_exchange_rate(exchange_year, _iso=iso)
 
+        target_value = (other_exchange_rate/self_exchange_rate)*self.value
+        return target_value

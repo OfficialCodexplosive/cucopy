@@ -1,96 +1,54 @@
-import pandas as pd
-import os, pathlib
-import datetime
-import urllib.request
-from locale import atof, setlocale, LC_NUMERIC
+from . import utils 
 
-from .config import DATASET_PATH, _timeseries
+EURO_AREA = ['DE']
+EURO_ADOPTION = 1999
 
 class Parser(object):
     """
     Parser class
-
     The Parser class provides the following functionality:
-
-    * It parses a csv file in its corresponding language and extracts the CPI value from a given date.
+    * It parses data from a given dataset and extracts either the CPI value or the exchange rate for a currency from a given date.
     
-    The parameters stored in a Parser object refer to:
-
-    * the language, in which the csv file was created (**language**; useful for choosing the correct delimiter)
-    * the delimiter used for separating the values in the file (**delimiter**; if no language was provided)
-    * the id of the csv file as outlined by the Deutsche Bundesbank (**classification**: https://www.bundesbank.de/dynamic/action/de/statistiken/zeitreihen-datenbanken/zeitreihen-datenbank/759778/759778?listId=www_s300_mb09_07)
-    * the proper locale module, derived from the specified language (**locale_module**)
+    The parameter stored in a Parser object refers to:
+    * the ISO 3166 ALPHA-2 code, which identifies a country and therefore the dominant currency.
     """
-    _supportedLang = {
-        'en' : ',',
-        'de' : ';'}
-
-    def __init__(self, **kwargs):
+    def __init__(self, iso : str):
         """
         Constructor for creating a Currency class instance
-
-        **Default arguments:**
-        :param language: the language of the .csv-files, important for parsing the file using pandas. Default is 'de'.
-        :type language: string
-
-        :param delimiter:  the delimiter used in a .csv-file, important for deducing the csv-file's location and parsing it using pandas, if no language is specified.
-        :type delimiter: string 
-
-        :param classification: the ID used to refer to the .csv-file.
-        :type classification: string 
+        **Arguments:**
+        :param iso: the ISO 3166 ALPHA-2 code, which identifies a country.
+        :type iso: string
         """
-        if 'language' in kwargs:
-            if kwargs.get('language') in self._supportedLang.keys():
-                _lang = kwargs.get('language')
-                self.lang_delim_pair = (_lang, self._supportedLang[_lang])
-                self.locale_module = 'de_DE.utf8' if (_lang == 'de') else 'en_US.utf8'
-        elif 'delimiter' in kwargs:
-            if kwargs.get('delimiter') == ',':
-                self.lang_delim_pair = ('en', ',')
-        else:
-            self.lang_delim_pair = ('de', ';')
-            self.locale_module = 'de_DE.utf8'
+        self.iso_code = iso
 
-        if 'classification' in kwargs:
-            if kwargs.get('classification') in _timeseries:
-                self.data_classification = _timeseries[kwargs.get('classification')]
-        else:
-            self.data_classification = _timeseries['all']
-
-        """ Path to where the default dataset will lie """
-        default_path = os.path.join(DATASET_PATH, self.lang_delim_pair[0] ,(f"BBDP1.M.DE.N.VPI.C.{self.data_classification}.I15.A.csv"))
-
-        self.df = pd.read_csv(default_path, delimiter=self.lang_delim_pair[1])
-
-    @classmethod
-    def specified_path(self, path : str, delimiter : str):
+    def get_cpi(self, year : str):
         """
-        Decorator for creating a Parser class instance with a custom path to a csv file.
-
-        **Required arguments:**
-        :param path: the path to the custom .csv-file.
-        :type path: string
-
-        :param delimiter:  the delimiter used in a .csv-file, important for parsing the file using pandas.
-        :type delimiter: string 
+        Function for extracting the cpi from the World Bank dataset for total CPI (FP.CPI.TOTL).
+        :param year: the year, from which to get the CPI for the currency identified by its ISO code.
+        :type year: string
         """
-        self.df = pd.read_csv(csv_path, delimiter=csv_delim)
+        dataset_id = utils.WB_DATASET_IDS['cpi']
+        iso = self.iso_code
+        out_format = 'json'
+        data = utils.get_wb_dataset(id=dataset_id, date=year, iso=iso, format=out_format, download_as=None)
+        return float(data[1][0]['value'])
 
-    def get_cpi(self, date : datetime.datetime):
+    def get_exchange_rate(self, year : str, _iso=None):
         """
-        Function for extracting the cpi from the Parser object's dataframe (self.df).
-
-        :param date_str: the target date, as a string
-        :type date_str: string
+        Function for extracting the exchange rate from the World Bank dataset for total CPI (FP.CPI.TOTL).
+        :param year: the year, from which to get the CPI for the currency identified by its ISO code.
+        :type year: string
         """
-        setlocale(LC_NUMERIC, self.locale_module)
+        dataset_id = utils.IMF_DATASET_IDS['national_currency_per_sdr_aop']
+        iso = self.iso_code.upper() if _iso==None else _iso.upper()
 
-        month = str(date.month).zfill(2)
+        if iso in EURO_AREA and int(year) > int(EURO_ADOPTION):
+                iso = 'U2'
+        data = utils.get_imf_dataset(indicator=dataset_id, date=year, geo_code=iso.upper())
 
-        date_index = f"{date.year}-{month}"
-        date_col = self.df.columns[0]
-        value_col = self.df.columns[1]
+        exchange_rate = data['Series']['Obs']['@OBS_VALUE']
 
-        value_str = self.df.loc[self.df[date_col] == date_index].iloc[0][value_col]
+        return float(exchange_rate)
 
-        return atof(value_str)
+
+        
