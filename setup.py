@@ -2,19 +2,18 @@ import os, setuptools
 dir_path = os.path.dirname(os.path.realpath(__file__))
 with open(os.path.join(dir_path, 'requirements.txt')) as f:
     required_packages = f.read().splitlines()
-#with open(os.path.join(dir_path, 'README.md'), "r") as fh:
-#    long_description = fh.read()
+with open(os.path.join(dir_path, 'README.md'), "r") as fh:
+    long_description = fh.read()
 
 setuptools.setup(
     name='cucopy',
     version='0.2.0',
     author='Julian Schönau',
     author_email='j.schoenau@fz-juelich.de',
-    description='Module for deflating euro values.',
-#    long_description=long_description,
+    description='Module for exchanging monetary values and inflation adjustment.',
+    long_description=long_description,
     long_description_content_type="text/markdown",
-    url='https://github.com/OfficialCodexplosive/cucopy',
-    download_url = 'https://github.com/OfficialCodexplosive/cucopy/archive/v0.1.9.tar.gz',
+    url='https://jugit.fz-juelich.de/j.schoenau/cucopy',
     include_package_data=True,
     packages=setuptools.find_packages(),
     install_requires=required_packages,

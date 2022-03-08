@@ -28,3 +28,4 @@ __pycache__/
 # files
 notes.txt
 */_legacy_comments.py
+./run.py
